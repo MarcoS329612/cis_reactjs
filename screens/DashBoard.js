@@ -1,10 +1,66 @@
-import { View, Text, TextInput, Button, ScrollView } from 'react-native';
+import { View, Text, TextInput, Button, ScrollView, ActivityIndicator } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Picker } from '@react-native-picker/picker'; // Importar Picker desde la nueva librería
+import * as ScreenOrientation from 'expo-screen-orientation';
 import DashBoardStyles from '../styles/DashBoardStyles';
+import axios from 'axios';
+import { BASE_URL } from '../config/config';
 
 export default function DashBoard({ navigation }) {
+  const [loadingJobs, setLoadingJobs] = useState(false);
+  const [loadingPieces, setLoadingPieces] = useState(false);
+  const [jobs, setJobs] = useState([]);
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [pieces, setPieces] = useState([]);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const enableOrientation = async () => {
+      await ScreenOrientation.unlockAsync();
+    };
+    enableOrientation();
+  }, []);
+
+  const fetchJobs = async () => {
+    setLoadingJobs(true);
+    setError(null);
+    try {
+      const response = await axios.get(`${BASE_URL}/jobs/test_job`);
+      console.log('Jobs data:', response.data); // Agregar este log
+      setJobs(response.data);
+    } catch (err) {
+      setError('Error al cargar los trabajos disponibles.');
+      console.error(err);
+    } finally {
+      setLoadingJobs(false);
+    }
+  };
+
+  const fetchPieces = async (jobId) => {
+    setLoadingPieces(true);
+    setError(null);
+    try {
+      const response = await axios.get(`${BASE_URL}/object/data/${jobId}`);
+      setPieces(response.data);
+    } catch (err) {
+      setError('Error al cargar las piezas del trabajo seleccionado.');
+      console.error(err);
+    } finally {
+      setLoadingPieces(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchJobs();
+  }, []);
+
+  const handleJobSelection = (jobId) => {
+    setSelectedJob(jobId);
+    fetchPieces(jobId);
+  };
+
   return (
     <ScrollView style={DashBoardStyles.container}>
-      {/* Header */}
       <View style={DashBoardStyles.header}>
         <Text style={DashBoardStyles.title}>GRUPO ARGA - INVENTORY CONTROL SYSTEM</Text>
         <Text style={DashBoardStyles.subtitle}>
@@ -12,46 +68,80 @@ export default function DashBoard({ navigation }) {
         </Text>
       </View>
 
-      {/* Buttons */}
+      {/* Botones */}
       <View style={DashBoardStyles.buttonContainer}>
         <Button title="Upload CSV File" onPress={() => {}} />
         <Button title="Scan with Camera" onPress={() => navigation.navigate('TakePhoto')} />
       </View>
 
-      {/* Search OCR */}
-      <View style={DashBoardStyles.searchContainer}>
-        <TextInput
-          style={DashBoardStyles.input}
-          placeholder="Search OCR"
-        />
-        <Button title="Find and Mark Scan" onPress={() => {}} />
-        <Button title="Save Changes" onPress={() => {}} />
+      {/* ComboBox para seleccionar un Job */}
+      <View style={DashBoardStyles.jobSelectorContainer}>
+        <Text style={DashBoardStyles.label}>Select a Job:</Text>
+        {loadingJobs ? (
+          <ActivityIndicator size="large" color="#0000ff" />
+        ) : (
+          <Picker
+            selectedValue={selectedJob}
+            onValueChange={(itemValue) => handleJobSelection(itemValue)}
+            style={DashBoardStyles.picker}
+          >
+            <Picker.Item key="default" label="Choose a Job" value={null} />
+            {jobs.map((job, index) => (
+              <Picker.Item
+                key={job.id || `job-${index}`}
+                label={job.name || `Job ${index + 1}`}
+                value={job.id || index}
+              />
+            ))}
+          </Picker>
+        )}
       </View>
 
-      {/* Console Messages */}
+      {/* Mensajes de Consola */}
       <View style={DashBoardStyles.console}>
         <Text style={DashBoardStyles.consoleTitle}>Console Messages</Text>
-        <View style={DashBoardStyles.consoleBox}></View>
+        <View style={DashBoardStyles.consoleBox}>
+          {error && <Text style={DashBoardStyles.errorText}>{error}</Text>}
+        </View>
       </View>
 
-      {/* Sections */}
-      <View style={DashBoardStyles.sectionContainer}>
-        {['CUTTING', 'MACHINING', 'WAREHOUSE', 'BENT'].map((section) => (
-          <View key={section} style={DashBoardStyles.section}>
-            <Text style={DashBoardStyles.sectionTitle}>{section}</Text>
-            <View style={DashBoardStyles.sectionContent}>
-              <View style={[DashBoardStyles.sectionColumn, DashBoardStyles.unscannedItems]}>
-                <Text style={DashBoardStyles.sectionLabel}>UNSCANNED ITEMS</Text>
-                <View style={DashBoardStyles.table}></View>
-              </View>
-              <View style={[DashBoardStyles.sectionColumn, DashBoardStyles.scannedItems]}>
-                <Text style={DashBoardStyles.sectionLabel}>SCANNED ITEMS</Text>
-                <View style={DashBoardStyles.table}></View>
+      {loadingPieces && <ActivityIndicator size="large" color="#0000ff" />}
+
+      {selectedJob && !loadingPieces && (
+        <View style={DashBoardStyles.sectionContainer}>
+          {['CUTTING', 'MACHINING', 'WAREHOUSE', 'BENT'].map((section) => (
+            <View key={section} style={DashBoardStyles.section}>
+              <Text style={DashBoardStyles.sectionTitle}>{section}</Text>
+              <View style={DashBoardStyles.sectionContent}>
+                <View style={[DashBoardStyles.sectionColumn, DashBoardStyles.unscannedItems]}>
+                  <Text style={DashBoardStyles.sectionLabel}>UNSCANNED ITEMS</Text>
+                  <View style={DashBoardStyles.table}>
+                    {pieces
+                      .filter((piece) => piece.section === section && !piece.scanned)
+                      .map((item, index) => (
+                        <Text key={index} style={DashBoardStyles.tableRow}>
+                          {item.name}
+                        </Text>
+                      ))}
+                  </View>
+                </View>
+                <View style={[DashBoardStyles.sectionColumn, DashBoardStyles.scannedItems]}>
+                  <Text style={DashBoardStyles.sectionLabel}>SCANNED ITEMS</Text>
+                  <View style={DashBoardStyles.table}>
+                    {pieces
+                      .filter((piece) => piece.section === section && piece.scanned)
+                      .map((item, index) => (
+                        <Text key={index} style={DashBoardStyles.tableRow}>
+                          {item.name}
+                        </Text>
+                      ))}
+                  </View>
+                </View>
               </View>
             </View>
-          </View>
-        ))}
-      </View>
+          ))}
+        </View>
+      )}
     </ScrollView>
   );
 }

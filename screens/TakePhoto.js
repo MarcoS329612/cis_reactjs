@@ -1,9 +1,8 @@
-// TakePhoto.js
-
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import * as MediaLibrary from 'expo-media-library';
+import * as ScreenOrientation from 'expo-screen-orientation'; // Importar la librería para manejar orientación
 import TakePhotoStyles from '../styles/TakePhotoStyles';
 
 export default function TakePhoto({ navigation }) {
@@ -11,6 +10,14 @@ export default function TakePhoto({ navigation }) {
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const [mediaPermission, requestMediaPermission] = MediaLibrary.usePermissions();
   const cameraRef = useRef(null);
+
+  // Habilitar orientación dinámica (vertical y horizontal)
+  useEffect(() => {
+    const enableOrientation = async () => {
+      await ScreenOrientation.unlockAsync(); // Permitir ambas orientaciones
+    };
+    enableOrientation();
+  }, []);
 
   if (!cameraPermission || !mediaPermission) {
     return <View />;
