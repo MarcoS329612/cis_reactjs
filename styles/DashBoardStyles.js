@@ -1,10 +1,14 @@
 import { StyleSheet } from 'react-native';
 
-export const DashBoardStyles = StyleSheet.create({
+const DashBoardStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f0f8ff',
     padding: 10,
+  },
+  contentContainer: {
+    // Estos estilos son opcionales, puedes agregar lo que necesites:
+    paddingBottom: 20,
   },
   header: {
     alignItems: 'center',
@@ -26,18 +30,25 @@ export const DashBoardStyles = StyleSheet.create({
     justifyContent: 'space-around',
     marginVertical: 10,
   },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginVertical: 10,
+  // Si usas un jobSelectorContainer
+  jobSelectorContainer: {
+    marginVertical: 20,
   },
-  input: {
+  label: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  picker: {
     borderWidth: 1,
     borderColor: '#ccc',
-    padding: 8,
-    flex: 1,
-    marginRight: 10,
+    borderRadius: 5,
+  },
+  console: {
+    marginTop: 20,
+  },
+  consoleTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   consoleBox: {
     borderWidth: 1,
@@ -45,10 +56,10 @@ export const DashBoardStyles = StyleSheet.create({
     height: 80,
     backgroundColor: '#fff',
     marginTop: 5,
+    padding: 5,
   },
-  consoleTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
+  errorText: {
+    color: 'red',
   },
   sectionContainer: {
     marginTop: 20,
@@ -91,6 +102,12 @@ export const DashBoardStyles = StyleSheet.create({
     borderColor: '#ccc',
     height: 120,
     backgroundColor: '#fff',
+    padding: 5,
+  },
+  tableRow: {
+    borderBottomWidth: 1,
+    borderColor: '#ccc',
+    paddingVertical: 5,
   },
 });
 

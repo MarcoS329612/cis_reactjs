@@ -1,6 +1,6 @@
 const config = {
     development: {
-      baseURL: 'https://ca3d-2806-108e-d-8bfe-342f-69ad-a193-e74f.ngrok-free.app', //URL para pruebas locales http://192.168.1.91:8000
+      baseURL: 'http://192.168.1.65:8000', //URL para pruebas locales http://192.168.1.91:8000
 
     },
     production: {
