@@ -1,4 +1,3 @@
-// styles/DashBoardStyles.js
 import { StyleSheet } from 'react-native';
 
 const DashBoardStyles = StyleSheet.create({
@@ -72,13 +71,19 @@ const DashBoardStyles = StyleSheet.create({
     marginBottom: 5,
   },
   ocrInput: {
+    flex: 1,
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
     padding: 10,
-    minHeight: 100,
+    minHeight: 50,
+    marginRight: 5,
     textAlignVertical: 'top',
     backgroundColor: '#fff',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   console: {
     marginTop: 10,

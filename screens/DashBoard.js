@@ -116,20 +116,24 @@ export default function DashBoard({ navigation, route }) {
           )}
         </View>
 
-        <View style={DashBoardStyles.ocrContainer}>
-          <Text style={DashBoardStyles.ocrLabel}>OCR Text:</Text>
-          <TextInput
-            style={DashBoardStyles.ocrInput}
-            multiline
-            value={ocrText}
-            onChangeText={setOcrText}
-            placeholder="Aquí se mostrará el texto leído por OCR, puedes editarlo..."
-          />
-        </View>
-
         <View style={DashBoardStyles.buttonContainer}>
           <Button title="Scan with Camera" onPress={() => navigation.navigate('TakePhoto')} />
         </View>
+
+        <View style={DashBoardStyles.ocrContainer}>
+  <Text style={DashBoardStyles.ocrLabel}>OCR Text:</Text>
+  <View style={DashBoardStyles.row}>
+    <TextInput
+      style={DashBoardStyles.ocrInput}
+      multiline
+      value={ocrText}
+      onChangeText={setOcrText}
+      placeholder="Here the text read by OCR will be displayed, you can edit it..."
+    />
+    <Button title="Register" onPress={() => {}} />
+  </View>
+</View>
+
 
         <View style={DashBoardStyles.console}>
           <Text style={DashBoardStyles.consoleTitle}>Console Messages</Text>
