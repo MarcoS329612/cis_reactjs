@@ -16,4 +16,4 @@ const TableStages = ({ pieces }) => {
   );
 };
 
-export default TableStages;
+export default TableStages;
