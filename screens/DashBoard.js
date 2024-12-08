@@ -1,6 +1,6 @@
 // DashBoard.js
 import React, { useEffect, useState } from 'react';
-import {View,Text,TextInput,Button,ScrollView,ActivityIndicator,Image,} from 'react-native';
+import { View, Text, TextInput, Button, ScrollView, ActivityIndicator, Image } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import DashBoardStyles from '../styles/DashBoardStyles';
@@ -40,14 +40,13 @@ export default function DashBoard({ navigation, route }) {
     setError(null);
 
     try {
-      // Realiza la petición GET al endpoint
       const response = await axios.get(`${BASE_URL}/jobs/list`);
       console.log('Jobs data:', response.data);
 
       // Transforma los datos para el Picker
       const transformedJobs = response.data.map((job) => ({
-        label: job.job_code, // Usa el `job_code` como etiqueta
-        value: job.job_code, // Usa el `job_code` como valor
+        label: job.job_code,
+        value: job.job_code,
       }));
 
       setJobs(transformedJobs);
@@ -63,8 +62,22 @@ export default function DashBoard({ navigation, route }) {
     setLoadingPieces(true);
     setError(null);
     try {
-      const response = await axios.get(`${BASE_URL}/object/data/${jobId}`);
-      setPieces(response.data);
+      // Aquí utilizamos jobId directamente en la URL
+      const response = await axios.get(`${BASE_URL}/jobs/${jobId}/status`);
+      const data = response.data;
+  
+      // Filtrar y mapear stages para excluir "Initialized" y preparar las tablas
+      const formattedStages = data.stages
+        .filter((stage) => stage.stage_name !== "Initialized") // Ignorar "Initialized"
+        .map((stage) => ({
+          stageName: stage.stage_name, // Nombre de la etapa
+          items: stage.items.map((item) => ({
+            itemName: item.item_name, // Nombre del item
+            totalQuantity: item.completed + item.pending, // Cantidad total
+          })),
+        }));
+  
+      setPieces(formattedStages);
     } catch (err) {
       setError('Error al cargar las piezas del trabajo seleccionado.');
       console.error(err);
@@ -75,6 +88,7 @@ export default function DashBoard({ navigation, route }) {
 
   const handleJobSelection = (jobId) => {
     setSelectedJob(jobId);
+    // Llamamos a fetchPieces con el jobId seleccionado
     fetchPieces(jobId);
   };
 
@@ -125,8 +139,8 @@ export default function DashBoard({ navigation, route }) {
               {jobs.map((job, index) => (
                 <Picker.Item
                   key={index}
-                  label={job.label} // Usar la etiqueta procesada
-                  value={job.value} // Usar el valor procesado
+                  label={job.label}
+                  value={job.value}
                 />
               ))}
             </Picker>
