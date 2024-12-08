@@ -12,11 +12,11 @@ export default function App() {
     function MyStack() {
       return (  
         <Stack.Navigator 
-        initialRouteName="Dashboard" // Cambia el nombre a la pantalla que quieres iniciar
+        initialRouteName="DashBoard" // Cambia el nombre a la pantalla que quieres iniciar
         screenOptions={{headerShown: false}}
       >
           <Stack.Screen name="Login" component={Login} /> 
-          <Stack.Screen name="Dashboard" component={DashBoard} />
+          <Stack.Screen name="DashBoard" component={DashBoard} />
           <Stack.Screen name="TakePhoto" component={TakePhoto} />
         </Stack.Navigator>
       );

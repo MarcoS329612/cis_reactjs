@@ -7,13 +7,14 @@ import axios from 'axios';
 import { BASE_URL } from '../config/config';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function DashBoard({ navigation }) {
+export default function DashBoard({ navigation, route }) {
   const [loadingJobs, setLoadingJobs] = useState(false);
   const [loadingPieces, setLoadingPieces] = useState(false);
   const [jobs, setJobs] = useState([]);
   const [selectedJob, setSelectedJob] = useState(null);
   const [pieces, setPieces] = useState([]);
   const [error, setError] = useState(null);
+  const [ocrText, setOcrText] = useState('');
 
   useEffect(() => {
     const enableOrientation = async () => {
@@ -21,6 +22,19 @@ export default function DashBoard({ navigation }) {
     };
     enableOrientation();
   }, []);
+
+  useEffect(() => {
+    fetchJobs();
+  }, []);
+
+  // Este efecto era para ocrText, lo puedes dejar si en algún momento recibes ocrText
+  // directamente como parámetro en lugar de ocrResult.
+  useEffect(() => {
+    if (route.params?.ocrText) {
+      setOcrText(route.params.ocrText);
+      console.log('Tipo de ocrText:', typeof route.params.ocrText);
+    }
+  }, [route.params?.ocrText]);
 
   const fetchJobs = async () => {
     setLoadingJobs(true);
@@ -51,10 +65,6 @@ export default function DashBoard({ navigation }) {
     }
   };
 
-  useEffect(() => {
-    fetchJobs();
-  }, []);
-
   const handleJobSelection = (jobId) => {
     setSelectedJob(jobId);
     fetchPieces(jobId);
@@ -66,13 +76,12 @@ export default function DashBoard({ navigation }) {
         style={DashBoardStyles.container} 
         contentContainerStyle={DashBoardStyles.contentContainer}
       >
-        {/* Logo de la empresa */}
         <View>
           <Image
             source={require('../assets/grupo_arga_cover.jpg')}
             style={{
               width: '100%',
-              height: undefined,
+              height: 'auto',
               aspectRatio: 4.5,  
               resizeMode: 'cover',
             }}
@@ -80,9 +89,8 @@ export default function DashBoard({ navigation }) {
         </View>
 
         <View style={DashBoardStyles.header}>
-          {/* Contenedor azul para el texto "INVENTORY CONTROL SYSTEM" */}
           <View style={{
-            backgroundColor: '#2196F3', // azul similar a los botones
+            backgroundColor: '#2196F3',
             paddingVertical: 8,
             paddingHorizontal: 20,
             borderRadius: 5,
@@ -100,37 +108,51 @@ export default function DashBoard({ navigation }) {
           </Text>
         </View>
 
-          {/* ComboBox para seleccionar un Job */}
         <View style={DashBoardStyles.jobSelectorContainer}>
           <Text style={DashBoardStyles.label}>Select a Job:</Text>
-              {loadingJobs ? (
-                  <ActivityIndicator size="large" color="#0000ff" />
-              ) : (
-                   <Picker
-                      selectedValue={selectedJob}
-                      onValueChange={(itemValue) => handleJobSelection(itemValue)}
-                      style={DashBoardStyles.picker}
-                    >
-                    <Picker.Item key="default" label="Choose a Job" value={null} />
-                    {jobs.map((job, index) => (
-                      <Picker.Item
-                        key={job.id || `job-${index}`}
-                        label={job.name || `Job ${index + 1}`}
-                        value={job.id || index}
-                     />
-                    ))}
-                    </Picker>
-                  )}
+          {loadingJobs ? (
+            <ActivityIndicator size="large" color="#0000ff" />
+          ) : (
+            <Picker
+              selectedValue={selectedJob}
+              onValueChange={(itemValue) => handleJobSelection(itemValue)}
+              style={DashBoardStyles.picker}
+            >
+              <Picker.Item key="default" label="Choose a Job" value={null} />
+              {jobs.map((job, index) => (
+                <Picker.Item
+                key={job.id || `job-${index}`}
+                label={job.name || `Job ${index + 1}`}
+                value={job.id || index}
+                />
+              ))}
+            </Picker>
+          )}
         </View>
 
-        {/* Botones */}
+        {/* Campo de texto para el OCR */}
+        <View style={{ marginVertical: 10, paddingHorizontal: 16 }}>
+          <Text style={{ marginBottom: 5 }}>OCR Text:</Text>
+          <TextInput
+            style={{
+              borderWidth: 1,
+              borderColor: '#ccc',
+              borderRadius: 5,
+              padding: 10,
+              minHeight: 100,
+              textAlignVertical: 'top',
+            }}
+            multiline
+            value={ocrText}
+            onChangeText={setOcrText}
+            placeholder="Aquí se mostrará el texto leído por OCR, puedes editarlo..."
+          />
+        </View>
+
         <View style={DashBoardStyles.buttonContainer}>
-          <Button title="Upload CSV File" onPress={() => {}} />
           <Button title="Scan with Camera" onPress={() => navigation.navigate('TakePhoto')} />
         </View>
 
-        
-        {/* Mensajes de Consola */}
         <View style={DashBoardStyles.console}>
           <Text style={DashBoardStyles.consoleTitle}>Console Messages</Text>
           <View style={DashBoardStyles.consoleBox}>
@@ -177,5 +199,5 @@ export default function DashBoard({ navigation }) {
         )}
       </ScrollView>
     </SafeAreaView>
-  );
+  );
 }
