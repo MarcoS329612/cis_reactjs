@@ -1,11 +1,13 @@
+// DashBoard.js
+import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, Button, ScrollView, ActivityIndicator, Image } from 'react-native';
-import { useEffect, useState } from 'react';
 import { Picker } from '@react-native-picker/picker';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import DashBoardStyles from '../styles/DashBoardStyles';
 import axios from 'axios';
 import { BASE_URL } from '../config/config';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import TableStages from '../screens/TableStages';
 
 export default function DashBoard({ navigation, route }) {
   const [loadingJobs, setLoadingJobs] = useState(false);
@@ -27,12 +29,9 @@ export default function DashBoard({ navigation, route }) {
     fetchJobs();
   }, []);
 
-  // Este efecto era para ocrText, lo puedes dejar si en algún momento recibes ocrText
-  // directamente como parámetro en lugar de ocrResult.
   useEffect(() => {
     if (route.params?.ocrText) {
       setOcrText(route.params.ocrText);
-      console.log('Tipo de ocrText:', typeof route.params.ocrText);
     }
   }, [route.params?.ocrText]);
 
@@ -71,7 +70,7 @@ export default function DashBoard({ navigation, route }) {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={DashBoardStyles.safeArea}>
       <ScrollView 
         style={DashBoardStyles.container} 
         contentContainerStyle={DashBoardStyles.contentContainer}
@@ -79,26 +78,13 @@ export default function DashBoard({ navigation, route }) {
         <View>
           <Image
             source={require('../assets/grupo_arga_cover.jpg')}
-            style={{
-              width: '100%',
-              height: 'auto',
-              aspectRatio: 4.5,  
-              resizeMode: 'cover',
-            }}
+            style={DashBoardStyles.coverImage}
           />
         </View>
 
         <View style={DashBoardStyles.header}>
-          <View style={{
-            backgroundColor: '#2196F3',
-            paddingVertical: 8,
-            paddingHorizontal: 20,
-            borderRadius: 5,
-            alignSelf: 'center',
-            marginTop: 10,
-            marginBottom: 5
-          }}>
-            <Text style={[DashBoardStyles.title, { color: '#fff', textAlign: 'center' }]}>
+          <View style={DashBoardStyles.headerBackground}>
+            <Text style={[DashBoardStyles.title, DashBoardStyles.headerTitleWhite]}>
               INVENTORY CONTROL SYSTEM
             </Text>
           </View>
@@ -111,7 +97,7 @@ export default function DashBoard({ navigation, route }) {
         <View style={DashBoardStyles.jobSelectorContainer}>
           <Text style={DashBoardStyles.label}>Select a Job:</Text>
           {loadingJobs ? (
-            <ActivityIndicator size="large" color="#0000ff" />
+            <ActivityIndicator size="large" style={DashBoardStyles.activityIndicator} />
           ) : (
             <Picker
               selectedValue={selectedJob}
@@ -121,27 +107,19 @@ export default function DashBoard({ navigation, route }) {
               <Picker.Item key="default" label="Choose a Job" value={null} />
               {jobs.map((job, index) => (
                 <Picker.Item
-                key={job.id || `job-${index}`}
-                label={job.name || `Job ${index + 1}`}
-                value={job.id || index}
+                  key={job.id || `job-${index}`}
+                  label={job.name || `Job ${index + 1}`}
+                  value={job.id || index}
                 />
               ))}
             </Picker>
           )}
         </View>
 
-        {/* Campo de texto para el OCR */}
-        <View style={{ marginVertical: 10, paddingHorizontal: 16 }}>
-          <Text style={{ marginBottom: 5 }}>OCR Text:</Text>
+        <View style={DashBoardStyles.ocrContainer}>
+          <Text style={DashBoardStyles.ocrLabel}>OCR Text:</Text>
           <TextInput
-            style={{
-              borderWidth: 1,
-              borderColor: '#ccc',
-              borderRadius: 5,
-              padding: 10,
-              minHeight: 100,
-              textAlignVertical: 'top',
-            }}
+            style={DashBoardStyles.ocrInput}
             multiline
             value={ocrText}
             onChangeText={setOcrText}
@@ -160,44 +138,10 @@ export default function DashBoard({ navigation, route }) {
           </View>
         </View>
 
-        {loadingPieces && <ActivityIndicator size="large" color="#0000ff" />}
+        {loadingPieces && <ActivityIndicator size="large" style={DashBoardStyles.activityIndicator} />}
 
-        {selectedJob && !loadingPieces && (
-          <View style={DashBoardStyles.sectionContainer}>
-            {['CUTTING', 'MACHINING', 'WAREHOUSE', 'BENT'].map((section) => (
-              <View key={section} style={DashBoardStyles.section}>
-                <Text style={DashBoardStyles.sectionTitle}>{section}</Text>
-                <View style={DashBoardStyles.sectionContent}>
-                  <View style={[DashBoardStyles.sectionColumn, DashBoardStyles.unscannedItems]}>
-                    <Text style={DashBoardStyles.sectionLabel}>UNSCANNED ITEMS</Text>
-                    <View style={DashBoardStyles.table}>
-                      {pieces
-                        .filter((piece) => piece.section === section && !piece.scanned)
-                        .map((item, index) => (
-                          <Text key={index} style={DashBoardStyles.tableRow}>
-                            {item.name}
-                          </Text>
-                        ))}
-                    </View>
-                  </View>
-                  <View style={[DashBoardStyles.sectionColumn, DashBoardStyles.scannedItems]}>
-                    <Text style={DashBoardStyles.sectionLabel}>SCANNED ITEMS</Text>
-                    <View style={DashBoardStyles.table}>
-                      {pieces
-                        .filter((piece) => piece.section === section && piece.scanned)
-                        .map((item, index) => (
-                          <Text key={index} style={DashBoardStyles.tableRow}>
-                            {item.name}
-                          </Text>
-                        ))}
-                    </View>
-                  </View>
-                </View>
-              </View>
-            ))}
-          </View>
-        )}
+        {selectedJob && !loadingPieces && <TableStages pieces={pieces} />}
       </ScrollView>
     </SafeAreaView>
-  );
+  );
 }

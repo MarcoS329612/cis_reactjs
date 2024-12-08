@@ -1,20 +1,7 @@
 // File: src/screens/Login.js
-
 import React, { useEffect, useState, useRef } from 'react';
-import { 
-  Text, 
-  View, 
-  TextInput, 
-  Button, 
-  ActivityIndicator, 
-  Alert, 
-  Image, 
-  KeyboardAvoidingView, 
-  Platform, 
-  ScrollView, 
-  TouchableWithoutFeedback, 
-  Keyboard 
-} from 'react-native';
+import { Text, View, TextInput, Button, ActivityIndicator, Alert, Image, KeyboardAvoidingView, Platform, 
+  ScrollView, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';

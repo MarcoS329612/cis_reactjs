@@ -1,50 +1,87 @@
+// styles/DashBoardStyles.js
 import { StyleSheet } from 'react-native';
 
 const DashBoardStyles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     backgroundColor: '#f0f8ff',
-    padding: 10,
+    padding: 1,
   },
   contentContainer: {
-    // Estos estilos son opcionales, puedes agregar lo que necesites:
-    paddingBottom: 20,
+    paddingBottom: 10,
+  },
+  coverImage: {
+    width: '100%',
+    height: 'auto',
+    aspectRatio: 4.5,
+    resizeMode: 'cover',
   },
   header: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 2,
+    marginTop: 0,
+  },
+  headerBackground: {
+    backgroundColor: '#2196F3',
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    alignSelf: 'center',
+    marginTop: 10,
+    marginBottom: 5,
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#0056b3',
     textAlign: 'center',
+  },
+  headerTitleWhite: {
+    color: '#fff',
   },
   subtitle: {
     fontSize: 14,
     color: '#808080',
     textAlign: 'center',
+    marginTop: 2,
   },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginVertical: 10,
-  },
-  // Si usas un jobSelectorContainer
   jobSelectorContainer: {
-    marginVertical: 20,
+    marginVertical: 10,
   },
   label: {
     fontSize: 16,
-    marginBottom: 5,
+    marginBottom: 2,
   },
   picker: {
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
   },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginVertical: 5,
+  },
+  ocrContainer: {
+    marginVertical: 10,
+    paddingHorizontal: 16,
+  },
+  ocrLabel: {
+    marginBottom: 5,
+  },
+  ocrInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    padding: 10,
+    minHeight: 100,
+    textAlignVertical: 'top',
+    backgroundColor: '#fff',
+  },
   console: {
-    marginTop: 20,
+    marginTop: 10,
   },
   consoleTitle: {
     fontSize: 16,
@@ -55,59 +92,14 @@ const DashBoardStyles = StyleSheet.create({
     borderColor: '#ccc',
     height: 80,
     backgroundColor: '#fff',
-    marginTop: 5,
+    marginTop: 2,
     padding: 5,
   },
   errorText: {
     color: 'red',
   },
-  sectionContainer: {
-    marginTop: 20,
-  },
-  section: {
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#0056b3',
-    marginBottom: 10,
-  },
-  sectionContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  sectionColumn: {
-    flex: 1,
-    marginHorizontal: 5,
-  },
-  unscannedItems: {
-    borderWidth: 2,
-    borderColor: '#ff0000', // Rojo
-    borderRadius: 5,
-    padding: 5,
-  },
-  scannedItems: {
-    borderWidth: 2,
-    borderColor: '#00ff00', // Verde
-    borderRadius: 5,
-    padding: 5,
-  },
-  sectionLabel: {
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  table: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    height: 120,
-    backgroundColor: '#fff',
-    padding: 5,
-  },
-  tableRow: {
-    borderBottomWidth: 1,
-    borderColor: '#ccc',
-    paddingVertical: 5,
+  activityIndicator: {
+    color: '#0000ff',
   },
 });
 
