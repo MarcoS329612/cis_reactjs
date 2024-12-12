@@ -1,4 +1,3 @@
-// File: src/screens/Login.js
 import React, { useEffect, useState, useRef } from 'react';
 import { Text, View, TextInput, Button, ActivityIndicator, Alert, Image, KeyboardAvoidingView, Platform, 
   ScrollView, TouchableWithoutFeedback, Keyboard } from 'react-native';
@@ -74,7 +73,7 @@ export default function Login({ navigation }) {
           <View style={LoginStyles.container}>
             {/* Logo de la Empresa */}
             <Image
-              source={require('../assets/grupo_arga_cover.jpg')} // Asegúrate de que la ruta sea correcta
+              source={require('../assets/grupo_arga_cover.png')} // Asegúrate de que la ruta sea correcta
               style={LoginStyles.logo}
               resizeMode="contain" // Mantiene la relación de aspecto
             />

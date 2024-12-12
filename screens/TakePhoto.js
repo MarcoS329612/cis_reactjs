@@ -1,38 +1,50 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, ActivityIndicator, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { BASE_URL } from '../config/config';
+import ConsoleMessages from '../screens/ConsoleMessages';
+import styles from '../styles/TakePhotoStyles'; 
 
-export default function TakePhoto({ navigation }) {
+export default function TakePhoto({ navigation, route }) {
   const [hasPermission, setHasPermission] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(true);
+  const selectedJob = route.params?.selectedJob;
+  const selectedStage = route.params?.selectedStage;
+  const consoleRef = useRef();
+  
   useEffect(() => {
     const enableOrientation = async () => {
-      await ScreenOrientation.unlockAsync(); // Permitir ambas orientaciones
+      await ScreenOrientation.unlockAsync();
     };
     enableOrientation();
   }, []);
 
   useEffect(() => {
-    // Solicitar permisos de cámara y galería
-    (async () => {
-      const cameraPerm = await ImagePicker.requestCameraPermissionsAsync();
-      const mediaPerm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      
-      if (cameraPerm.status === 'granted' && mediaPerm.status === 'granted') {
-        setHasPermission(true);
-      } else {
-        Alert.alert('Permisos necesarios', 'No se concedieron los permisos necesarios.');
-        navigation.goBack();
+    const requestPermissions = async () => {
+      try {
+        const cameraPerm = await ImagePicker.requestCameraPermissionsAsync();
+        const mediaPerm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        
+        if (cameraPerm.status === 'granted' && mediaPerm.status === 'granted') {
+          setHasPermission(true);
+        } else {
+          consoleRef.current?.addMessage('Permissions denied');
+          Alert.alert('Permisos necesarios', 'No se concedieron los permisos necesarios.');
+          navigation.goBack();
+        }
+      } catch (error) {
+        consoleRef.current?.addMessage('Error requesting permissions: ' + error.message);
       }
-    })();
+    };
+    
+    requestPermissions();
   }, []);
 
-  // Cuando tengamos permiso, tomar la foto automáticamente
   useEffect(() => {
     if (hasPermission) {
+      consoleRef.current?.addMessage('Starting camera...');
       takePicture();
     }
   }, [hasPermission]);
@@ -46,19 +58,22 @@ export default function TakePhoto({ navigation }) {
         base64: false
       });
 
-      // Si el usuario cancela la captura, regresar
       if (result.canceled) {
+        consoleRef.current?.addMessage('Camera capture cancelled by user');
         navigation.goBack();
         return;
       }
 
       const uri = result.assets[0].uri;
+      consoleRef.current?.addMessage('Image captured successfully');
 
       // Guardar la imagen en la galería
       const asset = await MediaLibrary.createAssetAsync(uri);
       await MediaLibrary.createAlbumAsync('MyAppPhotos', asset, false);
+      consoleRef.current?.addMessage('Image saved to gallery');
 
       // Enviar la imagen al endpoint /ocr
+      consoleRef.current?.addMessage('Sending image for OCR processing...');
       const formData = new FormData();
       formData.append('image', {
         uri: uri,
@@ -75,29 +90,37 @@ export default function TakePhoto({ navigation }) {
       });
 
       if (!response.ok) {
-        Alert.alert('Error', 'Hubo un problema al procesar la imagen.');
+        consoleRef.current?.addMessage('Error processing image with OCR');
+        Alert.alert('Error', 'There was a problem processing the image.');
         navigation.goBack();
         return;
       }
 
       const jsonResponse = await response.json();
+      consoleRef.current?.addMessage('OCR processing completed successfully');
       
       // Navegar de vuelta al dashboard con el resultado OCR
-      navigation.navigate('DashBoard', { ocrText: jsonResponse });
-
+      navigation.navigate('DashBoard', {
+        ocrText: jsonResponse,
+        selectedJob: selectedJob,
+        selectedStage: selectedStage,
+        fromCamera: true
+      });
 
     } catch (error) {
+      consoleRef.current?.addMessage('Error: ' + error.message);
       console.log(error);
-      Alert.alert('Error', 'Ocurrió un error al procesar la imagen.');
+      Alert.alert('Error', 'There was a problem processing the image.');
       navigation.goBack();
     }
   };
 
-  // Mientras se esperan permisos o se está en proceso, se puede mostrar un indicador de carga
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <ActivityIndicator size="large" color="#0000ff" />
+    <View style={styles.container}>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+      <ConsoleMessages ref={consoleRef} />
     </View>
   );
-  
 }

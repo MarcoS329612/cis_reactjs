@@ -15,7 +15,7 @@ const DashBoardStyles = StyleSheet.create({
   coverImage: {
     width: '100%',
     height: 'auto',
-    aspectRatio: 4.5,
+    aspectRatio: 6,
     resizeMode: 'cover',
   },
   header: {

@@ -1,9 +1,9 @@
-// DashBoard.js
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, TextInput, Button, ScrollView, ActivityIndicator, Image } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import DashBoardStyles from '../styles/DashBoardStyles';
+import ConsoleMessages from '../screens/ConsoleMessages';
 import axios from 'axios';
 import { BASE_URL } from '../config/config';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,9 +14,11 @@ export default function DashBoard({ navigation, route }) {
   const [loadingPieces, setLoadingPieces] = useState(false);
   const [jobs, setJobs] = useState([]);
   const [selectedJob, setSelectedJob] = useState(null);
+  const [selectedStage, setSelectedStage] = useState(null);
   const [pieces, setPieces] = useState([]);
   const [error, setError] = useState(null);
   const [ocrText, setOcrText] = useState('');
+  const consoleRef = useRef();
 
   useEffect(() => {
     const enableOrientation = async () => {
@@ -32,6 +34,7 @@ export default function DashBoard({ navigation, route }) {
   useEffect(() => {
     if (route.params?.ocrText) {
       setOcrText(route.params.ocrText);
+      consoleRef.current?.addMessage('OCR text received from camera');
     }
   }, [route.params?.ocrText]);
 
@@ -41,17 +44,17 @@ export default function DashBoard({ navigation, route }) {
 
     try {
       const response = await axios.get(`${BASE_URL}/jobs/list`);
-      console.log('Jobs data:', response.data);
-
-      // Transforma los datos para el Picker
       const transformedJobs = response.data.map((job) => ({
         label: job.job_code,
         value: job.job_code,
       }));
 
       setJobs(transformedJobs);
+      consoleRef.current?.addMessage('Jobs loaded successfully');
     } catch (err) {
-      setError('Error al cargar los trabajos disponibles.');
+      const errorMessage = 'Error loading available jobs.';
+      setError(errorMessage);
+      consoleRef.current?.addMessage(errorMessage);
       console.error(err);
     } finally {
       setLoadingJobs(false);
@@ -62,24 +65,25 @@ export default function DashBoard({ navigation, route }) {
     setLoadingPieces(true);
     setError(null);
     try {
-      // Aquí utilizamos jobId directamente en la URL
       const response = await axios.get(`${BASE_URL}/jobs/${jobId}/status`);
       const data = response.data;
   
-      // Filtrar y mapear stages para excluir "Initialized" y preparar las tablas
       const formattedStages = data.stages
-        .filter((stage) => stage.stage_name !== "Initialized") // Ignorar "Initialized"
+        .filter((stage) => stage.stage_name !== "Initialized")
         .map((stage) => ({
-          stageName: stage.stage_name, // Nombre de la etapa
+          stageName: stage.stage_name,
           items: stage.items.map((item) => ({
-            itemName: item.item_name, // Nombre del item
-            totalQuantity: item.completed + item.pending, // Cantidad total
+            itemName: item.item_name,
+            totalQuantity: item.completed + item.pending,
           })),
         }));
   
       setPieces(formattedStages);
+      consoleRef.current?.addMessage(`Pieces loaded for job: ${jobId}`);
     } catch (err) {
-      setError('Error al cargar las piezas del trabajo seleccionado.');
+      const errorMessage = 'Error loading parts for selected job.';
+      setError(errorMessage);
+      consoleRef.current?.addMessage(errorMessage);
       console.error(err);
     } finally {
       setLoadingPieces(false);
@@ -88,9 +92,23 @@ export default function DashBoard({ navigation, route }) {
 
   const handleJobSelection = (jobId) => {
     setSelectedJob(jobId);
-    // Llamamos a fetchPieces con el jobId seleccionado
-    fetchPieces(jobId);
+    if (jobId) {
+      consoleRef.current?.addMessage(`Selected job: ${jobId}`);
+      fetchPieces(jobId);
+    }
   };
+
+  useEffect(() => {
+    if (route.params?.fromCamera) {
+      if (route.params.selectedJob) {
+        setSelectedJob(route.params.selectedJob);
+        fetchPieces(route.params.selectedJob);
+      }
+      if (route.params.selectedStage) {
+        setSelectedStage(route.params.selectedStage);
+      }
+    }
+  }, [route.params?.fromCamera]);
 
   return (
     <SafeAreaView style={DashBoardStyles.safeArea}>
@@ -100,19 +118,14 @@ export default function DashBoard({ navigation, route }) {
       >
         <View>
           <Image
-            source={require('../assets/grupo_arga_cover.jpg')}
+            source={require('../assets/grupo_arga_cover.png')}
             style={DashBoardStyles.coverImage}
           />
         </View>
 
         <View style={DashBoardStyles.header}>
           <View style={DashBoardStyles.headerBackground}>
-            <Text
-              style={[
-                DashBoardStyles.title,
-                DashBoardStyles.headerTitleWhite,
-              ]}
-            >
+            <Text style={[DashBoardStyles.title, DashBoardStyles.headerTitleWhite]}>
               INVENTORY CONTROL SYSTEM
             </Text>
           </View>
@@ -125,66 +138,86 @@ export default function DashBoard({ navigation, route }) {
         <View style={DashBoardStyles.jobSelectorContainer}>
           <Text style={DashBoardStyles.label}>Select a Job:</Text>
           {loadingJobs ? (
-            <ActivityIndicator
-              size="large"
-              style={DashBoardStyles.activityIndicator}
-            />
+            <ActivityIndicator size="large" style={DashBoardStyles.activityIndicator} />
           ) : (
             <Picker
               selectedValue={selectedJob}
-              onValueChange={(itemValue) => handleJobSelection(itemValue)}
+              onValueChange={handleJobSelection}
               style={DashBoardStyles.picker}
             >
               <Picker.Item key="default" label="Choose a Job" value={null} />
               {jobs.map((job, index) => (
-                <Picker.Item
-                  key={index}
-                  label={job.label}
-                  value={job.value}
-                />
+                <Picker.Item key={index} label={job.label} value={job.value} />
               ))}
             </Picker>
           )}
         </View>
 
-        <View style={DashBoardStyles.buttonContainer}>
-          <Button
-            title="Scan with Camera"
-            onPress={() => navigation.navigate('TakePhoto')}
-          />
-        </View>
-
-        <View style={DashBoardStyles.ocrContainer}>
-          <Text style={DashBoardStyles.ocrLabel}>OCR Text:</Text>
-          <View style={DashBoardStyles.row}>
-            <TextInput
-              style={DashBoardStyles.ocrInput}
-              multiline
-              value={ocrText}
-              onChangeText={setOcrText}
-              placeholder="Here the text read by OCR will be displayed, you can edit it..."
-            />
-            <Button title="Register" onPress={() => {}} />
+        {selectedJob && (
+          <View style={DashBoardStyles.stageSelectorContainer}>
+            <Text style={DashBoardStyles.label}>Select a Stage:</Text>
+            <Picker
+              selectedValue={selectedStage}
+              onValueChange={(itemValue) => {
+                setSelectedStage(itemValue);
+                if (itemValue) {
+                  consoleRef.current?.addMessage(`Selected stage: ${itemValue}`);
+                }
+              }}
+              style={DashBoardStyles.picker}
+            >
+              <Picker.Item key="default" label="Choose a Stage" value={null} />
+              <Picker.Item key="cutting" label="CUTTING" value="CUTTING" />
+              <Picker.Item key="bent" label="BENT" value="BENT" />
+              <Picker.Item key="machining" label="MACHINING" value="MACHINING" />
+              <Picker.Item key="warehouse" label="WAREHOUSE" value="WAREHOUSE" />
+            </Picker>
           </View>
-        </View>
-
-        <View style={DashBoardStyles.console}>
-          <Text style={DashBoardStyles.consoleTitle}>Console Messages</Text>
-          <View style={DashBoardStyles.consoleBox}>
-            {error && (
-              <Text style={DashBoardStyles.errorText}>{error}</Text>
-            )}
-          </View>
-        </View>
-
-        {loadingPieces && (
-          <ActivityIndicator
-            size="large"
-            style={DashBoardStyles.activityIndicator}
-          />
         )}
 
-        {selectedJob && !loadingPieces && <TableStages pieces={pieces} />}
+        {selectedJob && (
+          <>
+            <View style={DashBoardStyles.buttonContainer}>
+              <Button
+                title="Scan with Camera"
+                onPress={() => {
+                  consoleRef.current?.addMessage('Opening camera...');
+                  navigation.navigate('TakePhoto', {
+                    selectedJob: selectedJob,
+                    selectedStage: selectedStage
+                  });
+                }}
+              />
+            </View>
+
+            <View style={DashBoardStyles.ocrContainer}>
+              <Text style={DashBoardStyles.ocrLabel}>OCR Text:</Text>
+              <View style={DashBoardStyles.row}>
+                <TextInput
+                  style={DashBoardStyles.ocrInput}
+                  multiline
+                  value={ocrText}
+                  onChangeText={setOcrText}
+                  placeholder="Here the text read by OCR will be displayed, you can edit it..."
+                />
+                <Button 
+                  title="Register" 
+                  onPress={() => {
+                    consoleRef.current?.addMessage('Registration process started');
+                  }} 
+                />
+              </View>
+            </View>
+
+            <ConsoleMessages ref={consoleRef} />
+
+            {loadingPieces && (
+              <ActivityIndicator size="large" style={DashBoardStyles.activityIndicator} />
+            )}
+
+            {!loadingPieces && <TableStages pieces={pieces} />}
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
