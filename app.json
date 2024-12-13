@@ -20,10 +20,10 @@
       "requireFullScreen": true,
       "supportsTablet": true
     },
-    "name": "cis",
-    "slug": "cis",
+    "name": "KitMaterials",
+    "slug": "KitMaterials",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "landscape",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
