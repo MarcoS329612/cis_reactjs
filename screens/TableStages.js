@@ -6,30 +6,31 @@ import TableStagesStyles from '../styles/TableStagesStyles';
 const TableStages = ({ pieces }) => {
   return (
     <View style={TableStagesStyles.container}>
-      
       {pieces && pieces.map((stage, index) => (
         <View key={index} style={TableStagesStyles.stageContainer}>
           {/* Título de la etapa */}
-          <Text style={TableStagesStyles.stageTitle}>{stage.stageName}</Text>
+          <Text selectable={true} style={TableStagesStyles.stageTitle}>
+            {stage.stageName}
+          </Text>
 
           {/* Encabezados de las columnas */}
           <View style={TableStagesStyles.tableHeader}>
-            <Text style={TableStagesStyles.tableHeaderText}>Item</Text>
-            <Text style={TableStagesStyles.tableHeaderText}>Completed</Text>
-            <Text style={TableStagesStyles.tableHeaderText}>Pending</Text>
+            <Text selectable={true} style={TableStagesStyles.tableHeaderText}>Item</Text>
+            <Text selectable={true} style={TableStagesStyles.tableHeaderText}>OCR</Text>
+            <Text selectable={true} style={TableStagesStyles.tableHeaderText}>Status</Text>
           </View>
 
           {/* Filas de la tabla */}
           {stage.items.map((item, itemIndex) => {
-            const rowStyle = item.pending > 0 
-              ? TableStagesStyles.tableRowRed 
-              : TableStagesStyles.tableRowGreen;
+            const rowStyle = (item.status == true) 
+              ? TableStagesStyles.tableRowGreen 
+              : null; // Ajusta esta condición si lo necesitas
 
             return (
               <View key={itemIndex} style={[TableStagesStyles.tableRow, rowStyle]}>
-                <Text style={TableStagesStyles.tableCell}>{item.itemName}</Text>
-                <Text style={TableStagesStyles.tableCell}>{item.completed}</Text>
-                <Text style={TableStagesStyles.tableCell}>{item.pending}</Text>
+                <Text selectable={true} style={TableStagesStyles.tableCell}>{item.itemName}</Text>
+                <Text selectable={true} style={TableStagesStyles.tableCell}>{item.itemOCR}</Text>
+                <Text selectable={true} style={TableStagesStyles.tableCell}>{item.ratio}</Text>
               </View>
             );
           })}
@@ -39,4 +40,4 @@ const TableStages = ({ pieces }) => {
   );
 };
 
-export default TableStages;
+export default TableStages;

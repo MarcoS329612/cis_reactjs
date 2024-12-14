@@ -74,7 +74,11 @@ export default function DashBoard({ navigation, route }) {
           stageName: stage.stage_name,
           items: stage.items.map((item) => ({
             itemName: item.item_name,
-            totalQuantity: item.completed + item.pending,
+            itemOCR: item.item_ocr,
+            ratio: item.ratio,
+            status: item.status,
+            
+            
           })),
         }));
   
@@ -109,6 +113,39 @@ export default function DashBoard({ navigation, route }) {
       }
     }
   }, [route.params?.fromCamera]);
+
+  // Agregar esta función justo arriba del return o en cualquier lugar dentro del componente
+  const updateItemStage = async () => {
+    if (!ocrText || !selectedStage) {
+      consoleRef.current?.addMessage('Debe seleccionar un stage y tener texto OCR disponible.');
+      return;
+    }
+
+    consoleRef.current?.addMessage('Iniciando actualización de stage...');
+    try {
+      const response = await axios.put(`${BASE_URL}/object/update_stage`, null, {
+        params: {
+          ocr: ocrText,
+          new_stage_name: selectedStage
+        }
+      });
+
+      if (response.status === 200) {
+        consoleRef.current?.addMessage('Stage actualizado exitosamente.');
+        // Aquí puedes actualizar el estado local o hacer algún otro proceso tras el update.
+        // Por ejemplo, volver a cargar las piezas si así lo necesitas:
+        if (selectedJob) {
+          await fetchPieces(selectedJob);
+        }
+      } else {
+        consoleRef.current?.addMessage(`Ocurrió un problema actualizando el stage. Código: ${response.status}`);
+      }
+    } catch (error) {
+      consoleRef.current?.addMessage('Error al actualizar el stage.');
+      console.error(error);
+    }
+  };
+
 
   return (
     <SafeAreaView style={DashBoardStyles.safeArea}>
@@ -200,10 +237,12 @@ export default function DashBoard({ navigation, route }) {
                   onChangeText={setOcrText}
                   placeholder="Here the text read by OCR will be displayed, you can edit it..."
                 />
+
                 <Button 
                   title="Register" 
                   onPress={() => {
                     consoleRef.current?.addMessage('Registration process started');
+                    updateItemStage(); // Llamamos a la función que realiza la petición al endpoint
                   }} 
                 />
               </View>
