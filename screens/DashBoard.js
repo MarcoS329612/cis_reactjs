@@ -43,7 +43,7 @@ export default function DashBoard({ navigation, route }) {
     setError(null);
 
     try {
-      const response = await axios.get(`${BASE_URL}/jobs/list`);
+      const response = await axios.get(`http://192.168.2.26:8080/jobs/list`);
       const transformedJobs = response.data.map((job) => ({
         label: job.job_code,
         value: job.job_code,
@@ -65,7 +65,7 @@ export default function DashBoard({ navigation, route }) {
     setLoadingPieces(true);
     setError(null);
     try {
-      const response = await axios.get(`${BASE_URL}/jobs/${jobId}/status`);
+      const response = await axios.get(`http://192.168.2.26:8080/jobs/${jobId}/status`);
       const data = response.data;
   
       const formattedStages = data.stages
@@ -123,7 +123,7 @@ export default function DashBoard({ navigation, route }) {
 
     consoleRef.current?.addMessage('Iniciando actualización de stage...');
     try {
-      const response = await axios.put(`${BASE_URL}/object/update_stage`, null, {
+      const response = await axios.put(`http://192.168.2.26:8080/object/update_stage`, null, {
         params: {
           ocr: ocrText,
           new_stage_name: selectedStage

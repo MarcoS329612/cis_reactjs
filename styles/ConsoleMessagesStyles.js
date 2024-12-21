@@ -42,7 +42,8 @@ export default StyleSheet.create({
         fontWeight: '500',
     },
     messagesContainer: {
-        maxHeight: 250,
+        //maxHeight: 250,
+        height: 250, // establecer una altura fija
     },
     messageItem: {
         padding: 12,
