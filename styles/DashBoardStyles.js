@@ -14,8 +14,8 @@ const DashBoardStyles = StyleSheet.create({
   },
   coverImage: {
     width: '100%',
-    height: 'auto',
-    aspectRatio: 6,
+    height: undefined, // Para respetar aspectRatio
+    aspectRatio: 15,
     resizeMode: 'cover',
   },
   header: {
@@ -26,14 +26,14 @@ const DashBoardStyles = StyleSheet.create({
   headerBackground: {
     backgroundColor: '#2196F3',
     paddingVertical: 8,
-    paddingHorizontal: 20,
+    paddingHorizontal: 100,
     borderRadius: 5,
     alignSelf: 'center',
-    marginTop: 10,
-    marginBottom: 5,
+    marginTop: 2,
+    marginBottom: 0,
   },
   title: {
-    fontSize: 20,
+    fontSize: 10,
     fontWeight: 'bold',
     textAlign: 'center',
   },
@@ -50,13 +50,15 @@ const DashBoardStyles = StyleSheet.create({
     marginVertical: 10,
   },
   label: {
-    fontSize: 16,
+    fontSize: 12,
     marginBottom: 2,
   },
   picker: {
-    borderWidth: 1,
+    borderWidth: 0,
     borderColor: '#ccc',
-    borderRadius: 5,
+    borderRadius: 1,
+    width: 200,
+    height: 'auto',
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -106,6 +108,13 @@ const DashBoardStyles = StyleSheet.create({
   activityIndicator: {
     color: '#0000ff',
   },
+  tableScroll: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    backgroundColor: '#fff',
+    padding: 5,
+    marginTop: 5,
+  },  
 });
 
 export default DashBoardStyles;

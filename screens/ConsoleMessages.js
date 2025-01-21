@@ -43,7 +43,9 @@ const ConsoleMessages = forwardRef((props, ref) => {
                     <Text style={styles.clearButtonText}>Clear</Text>
                 </TouchableOpacity>
             </View>
+            {/** ▼ SCROLLVIEW HIJO con nestedScrollEnabled */}
             <ScrollView 
+                nestedScrollEnabled={true}   // Permite scroll anidado
                 style={styles.messagesContainer}
                 showsVerticalScrollIndicator={true}
             >

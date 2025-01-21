@@ -2,27 +2,49 @@
 import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
-  container: {
-    margin: 10,
-  },
-  sectionLabel: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    textAlign: 'center',
+  gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
   stageContainer: {
-    marginBottom: 20,
+    width: '48%',
+    marginBottom: 5,
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
     padding: 10,
   },
+
+  // Cabecera de la "tarjeta" de cada stage:
+  // pone Título y el botón en la misma fila
+  stageHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,  
+  },
   stageTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 10,
-    textAlign: 'left',
+  },
+
+  // TextInput para filtrar
+  searchInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    marginBottom: 8,
+    marginTop: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+
+  tableScroll: {
+    maxHeight: 150,
+  },
+  tableContent: {
+    flexDirection: 'column',
   },
   tableHeader: {
     flexDirection: 'row',
@@ -34,22 +56,19 @@ export default StyleSheet.create({
   tableHeaderText: {
     flex: 1,
     fontWeight: 'bold',
-    textAlign: 'center'
+    textAlign: 'center',
   },
   tableRow: {
     flexDirection: 'row',
     marginVertical: 3,
     borderRadius: 5,
   },
-  tableRowRed: {
-    backgroundColor: '#ffcccc', // rojo suave si pending > 0
-  },
   tableRowGreen: {
-    backgroundColor: '#ccffcc', // verde suave si pending = 0
+    backgroundColor: '#ccffcc',
   },
   tableCell: {
     flex: 1,
     textAlign: 'center',
-    paddingVertical: 5,
-  },
+    paddingVertical: 5,
+  },
 });

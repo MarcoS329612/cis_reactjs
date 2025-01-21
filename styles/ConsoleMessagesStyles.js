@@ -2,8 +2,8 @@ import { StyleSheet, Platform } from 'react-native';
 
 export default StyleSheet.create({
     consoleContainer: {
-        marginVertical: 15,
-        marginHorizontal: 10,
+        marginVertical: 8,
+        marginHorizontal: 8,
         borderWidth: 1,
         borderColor: '#ddd',
         borderRadius: 8,
@@ -18,7 +18,7 @@ export default StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: 12,
+        padding: 8,
         borderBottomWidth: 1,
         borderBottomColor: '#eee',
         backgroundColor: '#f8f9fa',
@@ -26,7 +26,7 @@ export default StyleSheet.create({
         borderTopRightRadius: 8,
     },
     consoleTitle: {
-        fontSize: 18,
+        fontSize: 14,
         fontWeight: '600',
         color: '#2c3e50',
     },
@@ -43,10 +43,10 @@ export default StyleSheet.create({
     },
     messagesContainer: {
         //maxHeight: 250,
-        height: 250, // establecer una altura fija
+        height: 106, // establecer una altura fija
     },
     messageItem: {
-        padding: 12,
+        padding: 8,
         borderBottomWidth: 1,
         borderBottomColor: '#eee',
         backgroundColor: '#ffffff',
@@ -62,7 +62,7 @@ export default StyleSheet.create({
         fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
     },
     messageText: {
-        fontSize: 16,
+        fontSize: 10,
         color: '#2c3e50',
         fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
     },
