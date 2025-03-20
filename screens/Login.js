@@ -33,27 +33,78 @@ export default function Login({ navigation }) {
     setError(null);
 
     try {
-      const response = await axios.post(`${BASE_URL}/auth/login`, {
-        username,
-        password,
+      // Crear los datos en formato form-urlencoded exactamente como lo hace el navegador web
+      const formData = new URLSearchParams();
+      formData.append('username', username);
+      formData.append('password', password);
+      
+      console.log('Enviando datos de autenticación:', {
+        url: `${BASE_URL}/authenticate`,
+        body: formData.toString()
+      });
+      
+      // Hacer la petición al endpoint /authenticate como lo hace en el código del navegador
+      const response = await fetch(`${BASE_URL}/authenticate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData.toString()
+      });
+      
+      console.log('Respuesta del servidor:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers
       });
 
-      console.log('Login exitoso:', response.data);
+      // Si la respuesta no es exitosa, manejamos el error como lo hace el código del navegador
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.log('Error data:', JSON.stringify(errorData));
+        throw errorData; // Lanzamos el objeto de error directamente como en el código original
+      }
 
-      // Asumiendo que recibes un token o algún identificador
-      const { token } = response.data;
+      // Si todo es exitoso, parseamos la respuesta o redirigimos
+      if (response.headers.get('content-type')?.includes('application/json')) {
+        const data = await response.json();
+        console.log('Login exitoso:', data);
+        
+        // Si hay un token en la respuesta, lo guardamos
+        if (data.access_token) {
+          const token = data.access_token;
+          const tokenType = data.token_type || 'Bearer';
+          
+          await AsyncStorage.setItem('userToken', token);
+          await AsyncStorage.setItem('tokenType', tokenType);
+          
+          axios.defaults.headers.common['Authorization'] = `${tokenType} ${token}`;
+        }
+      } else {
+        // Si no hay JSON, asumimos que la autenticación fue exitosa pero no devuelve datos
+        console.log('Autenticación exitosa sin datos JSON');
+      }
 
-      // Guarda el token en AsyncStorage para persistencia
-      await AsyncStorage.setItem('userToken', token);
-
-      // Configura axios para incluir el token en las solicitudes futuras
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-
-      // Navega al DashBoard después de un inicio de sesión exitoso
+      // Navegamos al DashBoard
       navigation.navigate('DashBoard');
     } catch (err) {
-      console.error('Error en el inicio de sesión:', err);
-      setError('Credenciales inválidas. Por favor, intenta nuevamente.');
+      console.error('Error completo:', JSON.stringify(err));
+      
+      // Manejo de error similar al código del navegador
+      let errorMessage = 'Error de autenticación';
+      
+      if (err && typeof err === 'object') {
+        // Si err es un objeto, intentamos acceder a la propiedad detail
+        if (err.detail) {
+          errorMessage = err.detail;
+        } else {
+          // Si no tiene detail, mostramos el objeto completo como string
+          errorMessage = JSON.stringify(err);
+        }
+      }
+      
+      setError(errorMessage);
+      Alert.alert('Error de autenticación', errorMessage);
     } finally {
       setLoading(false);
     }
