@@ -1,5 +1,3 @@
-// File: src/styles/LoginStyles.js
-
 import { StyleSheet } from 'react-native';
 
 const LoginStyles = StyleSheet.create({

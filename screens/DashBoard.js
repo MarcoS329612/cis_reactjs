@@ -10,8 +10,7 @@ import {
   TouchableOpacity,
   Modal,
   Switch,
-  StyleSheet,
-  Alert
+  Alert,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as ScreenOrientation from 'expo-screen-orientation';
@@ -22,14 +21,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import TableStages from '../screens/TableStages';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { config } from '../config/config';  
+import { config } from '../config/config';
 
 export default function DashBoard({ navigation, route }) {
   const consoleRef = useRef();
 
-  // ----------------------------
-  //     ESTADOS PRINCIPALES
-  // ----------------------------
+  // Estados principales
   const [baseUrl, setBaseUrl] = useState('');
   const [loadingJobs, setLoadingJobs] = useState(false);
   const [loadingPieces, setLoadingPieces] = useState(false);
@@ -41,17 +38,12 @@ export default function DashBoard({ navigation, route }) {
   const [ocrText, setOcrText] = useState('');
   const STORAGE_KEY = '@app_baseUrl';
 
-  // ----------------------------
-  //  ESTADOS PARA EL MENÚ (MODAL) DE CONFIGURACIÓN
-  // ----------------------------
+  // Estados para el menú (modal) de configuración
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [ipValue, setIpValue] = useState('');
   const [portValue, setPortValue] = useState('');
   const [isHttps, setIsHttps] = useState(false);
 
-  // ----------------------------
-  //            EFFECTS
-  // ----------------------------
   useEffect(() => {
     const loadSavedBaseUrl = async () => {
       try {
@@ -70,7 +62,7 @@ export default function DashBoard({ navigation, route }) {
     };
     loadSavedBaseUrl();
   }, []);
-  
+
   useEffect(() => {
     const enableOrientation = async () => {
       await ScreenOrientation.unlockAsync();
@@ -78,20 +70,19 @@ export default function DashBoard({ navigation, route }) {
     enableOrientation();
   }, []);
 
-  // Efecto para cargar jobs cuando cambie baseUrl
+  // Cargar jobs cuando cambie baseUrl
   useEffect(() => {
     if (baseUrl) {
       fetchJobs();
     }
   }, [baseUrl]);
 
-  // Efecto para manejar el OCR y datos de la cámara
+  // Manejar datos recibidos (OCR, cámara, etc.)
   useEffect(() => {
     if (route.params?.ocrText) {
       setOcrText(route.params.ocrText);
       consoleRef.current?.addMessage('OCR text received from camera');
     }
-
     if (route.params?.fromCamera) {
       if (route.params.selectedJob) {
         setSelectedJob(route.params.selectedJob);
@@ -105,22 +96,19 @@ export default function DashBoard({ navigation, route }) {
     }
   }, [route.params]);
 
-  // Efecto para cargar las piezas cuando cambia el job
+  // Cargar piezas cuando cambia el job seleccionado
   useEffect(() => {
     if (selectedJob && baseUrl) {
       fetchPieces(selectedJob);
     }
   }, [selectedJob, baseUrl]);
 
-  // ----------------------------
-  //           FUNCIONES
-  // ----------------------------
+  // Función para obtener la lista de jobs
   const fetchJobs = async () => {
     if (!baseUrl) {
       console.log('No baseUrl available');
       return;
     }
-
     setLoadingJobs(true);
     setError(null);
 
@@ -130,7 +118,6 @@ export default function DashBoard({ navigation, route }) {
         label: job.job_code,
         value: job.job_code,
       }));
-
       setJobs(transformedJobs);
       consoleRef.current?.addMessage(`Jobs loaded successfully from: ${baseUrl}`);
     } catch (err) {
@@ -143,18 +130,18 @@ export default function DashBoard({ navigation, route }) {
     }
   };
 
+  // Función para obtener las piezas (stages)
   const fetchPieces = async (jobId) => {
     if (!baseUrl || !jobId) {
       console.log('No baseUrl or jobId available');
       return;
     }
-
     setLoadingPieces(true);
     setError(null);
+
     try {
       const response = await axios.get(`${baseUrl}/jobs/${jobId}/status`);
       const data = response.data;
-
       const formattedStages = data.stages
         .filter((stage) => stage.stage_name !== 'Initialized')
         .map((stage) => ({
@@ -166,7 +153,6 @@ export default function DashBoard({ navigation, route }) {
             status: item.status,
           })),
         }));
-
       setPieces(formattedStages);
       consoleRef.current?.addMessage(`Pieces loaded for job: ${jobId}`);
     } catch (err) {
@@ -186,17 +172,16 @@ export default function DashBoard({ navigation, route }) {
     }
   };
 
+  // Función para actualizar el stage de un item
   const updateItemStage = async () => {
     if (!baseUrl) {
       consoleRef.current?.addMessage('No baseUrl available');
       return;
     }
-
     if (!ocrText || !selectedStage) {
       consoleRef.current?.addMessage('Debe seleccionar un stage y tener texto OCR disponible.');
       return;
     }
-
     consoleRef.current?.addMessage('Iniciando actualización de stage...');
     try {
       const response = await axios.put(`${baseUrl}/object/update_stage`, null, {
@@ -205,7 +190,6 @@ export default function DashBoard({ navigation, route }) {
           new_stage_name: selectedStage,
         },
       });
-
       if (response.status === 200) {
         consoleRef.current?.addMessage('Stage actualizado exitosamente.');
         if (selectedJob) {
@@ -222,12 +206,12 @@ export default function DashBoard({ navigation, route }) {
     }
   };
 
+  // Función para aplicar la configuración del servidor
   const applySettings = async () => {
     if (!ipValue || !portValue) {
       Alert.alert('Error', 'Por favor ingrese IP y puerto');
       return;
     }
-
     const protocol = isHttps ? 'https://' : 'http://';
     const newBaseUrl = `${protocol}${ipValue}:${portValue}`;
   
@@ -243,6 +227,41 @@ export default function DashBoard({ navigation, route }) {
     setSettingsVisible(false);
   };
 
+  // Función de logout
+  const handleLogout = async () => {
+    try {
+      // Obtener token y tipo de token
+      const token = await AsyncStorage.getItem('userToken');
+      const tokenType = await AsyncStorage.getItem('tokenType');
+
+      // (Opcional) Llamada al endpoint /logout para invalidar el token en el servidor
+      if (token && tokenType) {
+        const response = await fetch(`${baseUrl}/logout`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `${tokenType} ${token}`,
+          },
+        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.log('Error al hacer logout:', JSON.stringify(errorData));
+          throw errorData;
+        }
+      }
+
+      // Eliminar token del AsyncStorage y remover la cabecera de axios
+      await AsyncStorage.removeItem('userToken');
+      await AsyncStorage.removeItem('tokenType');
+      delete axios.defaults.headers.common['Authorization'];
+
+      // Navegar a la pantalla de Login
+      navigation.navigate('Login');
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+      Alert.alert('Error', 'Ocurrió un error al cerrar sesión.');
+    }
+  };
+
   return (
     <SafeAreaView style={DashBoardStyles.safeArea}>
       <ScrollView
@@ -250,9 +269,19 @@ export default function DashBoard({ navigation, route }) {
         contentContainerStyle={DashBoardStyles.contentContainer}
         nestedScrollEnabled={true}
       >
-        <View style={styles.topBar}>
-          <TouchableOpacity style={styles.iconButton} onPress={() => setSettingsVisible(true)}>
+        {/* Barra superior con íconos de configuración y logout */}
+        <View style={DashBoardStyles.topBar}>
+          <TouchableOpacity
+            style={DashBoardStyles.iconButton}
+            onPress={() => setSettingsVisible(true)}
+          >
             <AntDesign name="tool" size={20} color="black" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={DashBoardStyles.iconButton}
+            onPress={handleLogout}
+          >
+            <AntDesign name="logout" size={20} color="black" />
           </TouchableOpacity>
         </View>
 
@@ -265,7 +294,9 @@ export default function DashBoard({ navigation, route }) {
 
         <View style={[DashBoardStyles.jobSelectorContainer, DashBoardStyles.row]}>
           <View style={{ flex: 1, marginRight: 5 }}>
-            <Text style={[DashBoardStyles.label, { marginRight: 10 }]}>Select a Job:</Text>
+            <Text style={[DashBoardStyles.label, { marginBottom: 2 }]}>
+              Select a Job:
+            </Text>
             {loadingJobs ? (
               <ActivityIndicator size="large" style={DashBoardStyles.activityIndicator} />
             ) : (
@@ -284,7 +315,9 @@ export default function DashBoard({ navigation, route }) {
 
           {selectedJob && (
             <View style={{ flex: 1, marginLeft: 5 }}>
-              <Text style={[DashBoardStyles.label, { marginRight: 10 }]}>Select a Stage:</Text>
+              <Text style={[DashBoardStyles.label, { marginBottom: 2 }]}>
+                Select a Stage:
+              </Text>
               <Picker
                 selectedValue={selectedStage}
                 onValueChange={(value) => {
@@ -318,9 +351,9 @@ export default function DashBoard({ navigation, route }) {
                 onPress={() => {
                   consoleRef.current?.addMessage('Opening camera...');
                   navigation.navigate('TakePhoto', {
-                    selectedJob: selectedJob,
-                    selectedStage: selectedStage,
-                    baseUrl: baseUrl,
+                    selectedJob,
+                    selectedStage,
+                    baseUrl,
                   });
                 }}
               />
@@ -365,49 +398,33 @@ export default function DashBoard({ navigation, route }) {
           </>
         )}
 
-        <Modal
-          visible={settingsVisible}
-          transparent
-          animationType="slide"
-        >
-          <View style={styles.modalBackground}>
-            <View style={styles.modalContainer}>
-              <Text style={styles.modalTitle}>Configuración de Servidor</Text>
-
-              <Text style={styles.modalLabel}>IP (sin http/https):</Text>
+        {/* Modal de Configuración */}
+        <Modal visible={settingsVisible} transparent animationType="slide">
+          <View style={DashBoardStyles.modalBackground}>
+            <View style={DashBoardStyles.modalContainer}>
+              <Text style={DashBoardStyles.modalTitle}>Configuración de Servidor</Text>
+              <Text style={DashBoardStyles.modalLabel}>IP (sin http/https):</Text>
               <TextInput
-                style={styles.modalInput}
+                style={DashBoardStyles.modalInput}
                 value={ipValue}
                 onChangeText={setIpValue}
                 placeholder="Ej: 192.168.0.123"
               />
-
-              <Text style={styles.modalLabel}>Puerto:</Text>
+              <Text style={DashBoardStyles.modalLabel}>Puerto:</Text>
               <TextInput
-                style={styles.modalInput}
+                style={DashBoardStyles.modalInput}
                 value={portValue}
                 onChangeText={setPortValue}
                 keyboardType="numeric"
                 placeholder="Ej: 8080"
               />
-
-              <View style={styles.switchRow}>
-                <Text style={styles.modalLabel}>HTTPS</Text>
-                <Switch
-                  value={isHttps}
-                  onValueChange={(val) => setIsHttps(val)}
-                />
+              <View style={DashBoardStyles.switchRow}>
+                <Text style={DashBoardStyles.modalLabel}>HTTPS</Text>
+                <Switch value={isHttps} onValueChange={(val) => setIsHttps(val)} />
               </View>
-
               <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 20 }}>
-                <Button
-                  title="Cancelar"
-                  onPress={() => setSettingsVisible(false)}
-                />
-                <Button
-                  title="Aplicar"
-                  onPress={applySettings}
-                />
+                <Button title="Cancelar" onPress={() => setSettingsVisible(false)} />
+                <Button title="Aplicar" onPress={applySettings} />
               </View>
             </View>
           </View>
@@ -416,49 +433,3 @@ export default function DashBoard({ navigation, route }) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  topBar: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    padding: 10,
-    backgroundColor: '#fff',
-  },
-  modalBackground: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContainer: {
-    width: '80%',
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 16,
-    elevation: 5,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  modalLabel: {
-    fontWeight: '600',
-    marginTop: 10,
-  },
-  modalInput: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 4,
-    padding: 8,
-    marginTop: 5,
-  },
-  switchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 10,
-  },
-
-  });

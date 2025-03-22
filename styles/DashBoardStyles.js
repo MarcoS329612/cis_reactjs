@@ -114,7 +114,53 @@ const DashBoardStyles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 5,
     marginTop: 5,
-  },  
+  },
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    padding: 10,
+    backgroundColor: '#fff',
+  },
+  iconButton: {
+    marginLeft: 10,
+    padding: 5,
+  },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    width: '80%',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 16,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  modalLabel: {
+    fontWeight: '600',
+    marginTop: 10,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 4,
+    padding: 8,
+    marginTop: 5,
+  },
+  switchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
 });
 
 export default DashBoardStyles;
