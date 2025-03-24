@@ -9,32 +9,32 @@ const LoginStyles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    padding: 20,
-    justifyContent: 'flex-start', // Alinea el contenido al inicio verticalmente
-    backgroundColor: '#ffffff', // Fondo completamente blanco
-    alignItems: 'center', // Centra los elementos horizontalmente
-    paddingTop: 60, // Espacio desde la parte superior de la pantalla
+    paddingHorizontal: 20,
+    backgroundColor: '#ffffff',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    paddingTop: 60,
   },
   logo: {
-    width: 300, // Aumenta el ancho para un logo más grande
-    height: 300, // Ajusta la altura según la relación de aspecto de tu logo
-    marginBottom: 30, // Espacio entre el logo y el título
+    width: 300,
+    height: 300,
+    marginBottom: 30,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 20, // Reducir margen para compacidad
+    marginBottom: 20,
     textAlign: 'center',
     color: '#333',
   },
   input: {
-    width: '100%', // Asegura que los inputs ocupen todo el ancho disponible
+    width: '100%',
     height: 50,
     borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 15,
-    marginBottom: 15, // Reducir margen para compacidad
+    marginBottom: 15,
     backgroundColor: '#fff',
   },
   loader: {
@@ -42,12 +42,13 @@ const LoginStyles = StyleSheet.create({
   },
   errorText: {
     color: 'red',
-    marginBottom: 15, // Reducir margen para compacidad
+    marginBottom: 15,
     textAlign: 'center',
   },
   buttonContainer: {
-    width: '100%',
-    marginTop: 10, // Espacio superior para separar el botón de los campos
+    width: '70%',       // El botón ocupa el 70% del ancho
+    alignSelf: 'center', // Centrado horizontalmente
+    marginTop: 20,       // Mayor separación respecto a los inputs
   },
 });
 

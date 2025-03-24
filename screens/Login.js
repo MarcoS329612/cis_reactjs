@@ -25,7 +25,6 @@ export default function Login({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Referencia para el campo de contraseña
   const passwordInputRef = useRef(null);
 
   useEffect(() => {
@@ -100,11 +99,7 @@ export default function Login({ navigation }) {
       console.error('Error completo:', JSON.stringify(err));
       let errorMessage = 'Error de autenticación';
       if (err && typeof err === 'object') {
-        if (err.detail) {
-          errorMessage = err.detail;
-        } else {
-          errorMessage = JSON.stringify(err);
-        }
+        errorMessage = err.detail ? err.detail : JSON.stringify(err);
       }
       setError(errorMessage);
       Alert.alert('Error de autenticación', errorMessage);

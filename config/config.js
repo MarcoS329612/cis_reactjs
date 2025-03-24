@@ -1,7 +1,7 @@
 // config/config.js
 export const config = {
   development: {
-    baseURL: 'http://192.168.1.96:8000',
+    baseURL: 'http://192.168.1.137:8000',
   },
   production: {
     baseURL: 'http://192.168.2.x:8080',
