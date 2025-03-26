@@ -279,7 +279,17 @@ export default function DashBoard({ navigation, route }) {
           </TouchableOpacity>
           <TouchableOpacity
             style={DashBoardStyles.iconButton}
-            onPress={handleLogout}
+            onPress={() =>
+              Alert.alert(
+                "Confirmación",
+                "¿Estás seguro de que deseas cerrar la sesión?",
+                [
+                  { text: "Cancelar", style: "cancel" },
+                  { text: "Sí", onPress: handleLogout }
+                ],
+                { cancelable: false }
+              )
+            }
           >
             <AntDesign name="logout" size={20} color="black" />
           </TouchableOpacity>
